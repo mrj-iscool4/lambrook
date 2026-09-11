@@ -41,10 +41,7 @@ export async function updateRobloxBan({
     ? {
         gameJoinRestriction: {
           active: true,
-          duration: `${Math.max(
-            1,
-            durationSeconds ?? 315576000000
-          )}s`,
+          duration: `${durationSeconds ?? -1}s`,
           privateReason:
             reason || "UKRP moderation action.",
           displayReason:
@@ -93,13 +90,16 @@ export async function updateRobloxBan({
         // Response wasn't JSON.
       }
 
-      console.error("Roblox Open Cloud restriction failed:", {
-        status: response.status,
-        statusText: response.statusText,
-        userId,
-        universeId: config.universeId,
-        response: responseText,
-      });
+      console.error(
+        "Roblox Open Cloud restriction failed:",
+        {
+          status: response.status,
+          statusText: response.statusText,
+          userId,
+          universeId: config.universeId,
+          response: responseText,
+        }
+      );
 
       return {
         configured: true,
