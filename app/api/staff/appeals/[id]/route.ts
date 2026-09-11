@@ -22,19 +22,21 @@ export async function PATCH(
     );
   }
 
-if (!staff.userId) {
-  return NextResponse.json(
-    { error: "Unable to identify the authenticated staff member." },
-    { status: 401 }
-  );
-}
-  
   if (!staff.authorized) {
     return NextResponse.json(
       { error: "Forbidden." },
       { status: 403 }
     );
   }
+
+  if (!staff.userId) {
+    return NextResponse.json(
+      { error: "Unable to identify the authenticated staff member." },
+      { status: 401 }
+    );
+  }
+
+  const staffUserId = staff.userId;
 
   const { id } = await params;
 
@@ -145,7 +147,7 @@ if (!staff.userId) {
           },
           data: {
             status: "Approved",
-            reviewedBy: staff.userId,
+            reviewedBy: staffUserId,
             reviewedAt: new Date(),
             response:
               responseText ||
@@ -155,7 +157,7 @@ if (!staff.userId) {
 
         await tx.auditLog.create({
           data: {
-            actorId: staff.userId,
+            actorId: staffUserId,
             action: "APPEAL_APPROVED",
             targetType: "Appeal",
             targetId: appeal.id,
@@ -169,7 +171,7 @@ if (!staff.userId) {
 
         await tx.auditLog.create({
           data: {
-            actorId: staff.userId,
+            actorId: staffUserId,
             action: "BAN_REVOKED_APPEAL",
             targetType: "Ban",
             targetId: ban.id,
@@ -194,7 +196,7 @@ if (!staff.userId) {
       },
       data: {
         status: "Denied",
-        reviewedBy: staff.userId,
+        reviewedBy: staffUserId,
         reviewedAt: new Date(),
         response:
           responseText ||
@@ -204,7 +206,7 @@ if (!staff.userId) {
 
     await prisma.auditLog.create({
       data: {
-        actorId: staff.userId,
+        actorId: staffUserId,
         action: "APPEAL_DENIED",
         targetType: "Appeal",
         targetId: appeal.id,
