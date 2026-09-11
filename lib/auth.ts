@@ -1,9 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 export const STAFF_ROLES = [
-  "org:moderator",
-  "org:senior_moderator",
-  "org:adminsitrator",
+  "org:staff",
   "org:management",
 ] as const;
 
