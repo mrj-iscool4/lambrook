@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export const STAFF_ORGANIZATION_ID =
   "org_3JAF0g2rrpvseJGSTQM7CrUyte1";
@@ -11,16 +11,7 @@ export const STAFF_ROLES = [
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 export async function getStaffAuth() {
-  const { userId, orgId, orgRole, has } = await auth();
-
-  console.log("STAFF AUTH DEBUG:", {
-    userId,
-    orgId,
-    orgRole,
-    staffOrganization: STAFF_ORGANIZATION_ID,
-    staffRole: has({ role: "org:staff" }),
-    managementRole: has({ role: "org:management" }),
-  });
+  const { userId } = await auth();
 
   if (!userId) {
     return {
@@ -31,7 +22,20 @@ export async function getStaffAuth() {
     };
   }
 
-  if (orgId !== STAFF_ORGANIZATION_ID) {
+  const client = await clerkClient();
+
+  const { data: memberships } =
+    await client.users.getOrganizationMembershipList({
+      userId,
+      limit: 100,
+    });
+
+  const membership = memberships.find(
+    (membership) =>
+      membership.organization.id === STAFF_ORGANIZATION_ID
+  );
+
+  if (!membership) {
     return {
       authenticated: true,
       authorized: false,
@@ -40,13 +44,17 @@ export async function getStaffAuth() {
     };
   }
 
-  const role = STAFF_ROLES.find((role) => has({ role }));
+  const role = STAFF_ROLES.includes(
+    membership.role as StaffRole
+  )
+    ? (membership.role as StaffRole)
+    : null;
 
   return {
     authenticated: true,
-    authorized: Boolean(role),
+    authorized: role !== null,
     userId,
-    role: role ?? null,
+    role,
   };
 }
 
