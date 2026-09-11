@@ -29,12 +29,14 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!staff.userId) {
+if (!staff.userId) {
   return NextResponse.json(
     { error: "Unable to identify the authenticated staff member." },
     { status: 401 }
   );
 }
+
+const staffUserId = staff.userId;
 
     const body = await request.json();
 
@@ -143,7 +145,7 @@ export async function POST(request: Request) {
         reason,
         duration,
         expiresAt,
-        issuedBy: staff.userId,
+        issuedBy: staffUserId,
         notes: notes || null,
         active: !isWarning,
       },
@@ -173,7 +175,7 @@ export async function POST(request: Request) {
 
         await prisma.auditLog.create({
           data: {
-            actorId: staff.userId,
+            actorId: staffUserId,
             action: "BAN_ROBLOX_SYNC_FAILED",
             targetType: "Ban",
             targetId: ban.id,
@@ -208,7 +210,7 @@ export async function POST(request: Request) {
 
       await prisma.auditLog.create({
         data: {
-          actorId: staff.userId,
+          actorId: staffUserId,
           action: "BAN_ROBLOX_SYNC_FAILED",
           targetType: "Ban",
           targetId: ban.id,
@@ -231,7 +233,7 @@ export async function POST(request: Request) {
 
     await prisma.auditLog.create({
       data: {
-        actorId: staff.userId,
+        actorId: staffUserId,
         action: isWarning ? "WARNING_CREATED" : "BAN_CREATED",
         targetType: "Ban",
         targetId: ban.id,
