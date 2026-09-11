@@ -29,6 +29,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!staff.userId) {
+  return NextResponse.json(
+    { error: "Unable to identify the authenticated staff member." },
+    { status: 401 }
+  );
+}
+
     const body = await request.json();
 
     const robloxUserId = String(body.robloxUserId ?? "").trim();
