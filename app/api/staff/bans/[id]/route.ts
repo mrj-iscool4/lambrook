@@ -38,6 +38,8 @@ if (!staff.userId) {
   );
 }
 
+const staffUserId = staff.userId;
+
     const { id } = await params;
     const body = await request.json();
 
@@ -87,7 +89,7 @@ if (!staff.userId) {
 
         await prisma.auditLog.create({
           data: {
-            actorId: staff.userId,
+            actorId: staffUserId,
             action: "BAN_ROBLOX_SYNC_FAILED",
             targetType: "Ban",
             targetId: ban.id,
@@ -117,7 +119,7 @@ if (!staff.userId) {
 
       await prisma.auditLog.create({
         data: {
-          actorId: staff.userId,
+          actorId: staffUserId,
           action: "BAN_REVOKED",
           targetType: "Ban",
           targetId: ban.id,
@@ -175,7 +177,7 @@ if (!staff.userId) {
 
         await prisma.auditLog.create({
           data: {
-            actorId: staff.userId,
+            actorId: staffUserId,
             action: "BAN_ROBLOX_SYNC_FAILED",
             targetType: "Ban",
             targetId: ban.id,
@@ -205,7 +207,7 @@ if (!staff.userId) {
 
       await prisma.auditLog.create({
         data: {
-          actorId: staff.userId,
+          actorId: staffUserId,
           action: "BAN_RESTORED",
           targetType: "Ban",
           targetId: ban.id,
@@ -362,7 +364,7 @@ if (!staff.userId) {
 
         await prisma.auditLog.create({
           data: {
-            actorId: staff.userId,
+            actorId: staffUserId,
             action: "BAN_ROBLOX_SYNC_FAILED",
             targetType: "Ban",
             targetId: ban.id,
@@ -402,7 +404,7 @@ if (!staff.userId) {
 
     await prisma.auditLog.create({
       data: {
-        actorId: staff.userId,
+        actorId: staffUserId,
         action: "BAN_EDITED",
         targetType: "Ban",
         targetId: ban.id,
