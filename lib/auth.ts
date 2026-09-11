@@ -11,7 +11,16 @@ export const STAFF_ROLES = [
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 export async function getStaffAuth() {
-  const { userId, orgId, has } = await auth();
+  const { userId, orgId, orgRole, has } = await auth();
+
+  console.log("STAFF AUTH DEBUG:", {
+    userId,
+    orgId,
+    orgRole,
+    staffOrganization: STAFF_ORGANIZATION_ID,
+    staffRole: has({ role: "org:staff" }),
+    managementRole: has({ role: "org:management" }),
+  });
 
   if (!userId) {
     return {
@@ -22,7 +31,6 @@ export async function getStaffAuth() {
     };
   }
 
-  // Staff access is only valid inside the UKRP Staff Organization.
   if (orgId !== STAFF_ORGANIZATION_ID) {
     return {
       authenticated: true,
