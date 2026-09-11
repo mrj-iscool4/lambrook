@@ -636,14 +636,8 @@ function formatRole(role: string | null) {
     case "org:management":
       return "Management";
 
-    case "org:adminsitrator":
-      return "Administrator";
-
-    case "org:senior_moderator":
-      return "Senior Moderator";
-
-    case "org:moderator":
-      return "Moderator";
+    case "org:staff":
+      return "Staff";
 
     default:
       return "Staff";
