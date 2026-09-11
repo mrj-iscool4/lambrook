@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Ban {
+  id            String    @id @default(cuid())
+  caseId        String    @unique
+
+  robloxUserId  String
+  username      String
+  displayName   String?
+
+  reason        String
+  duration      String
+
+  issuedAt      DateTime  @default(now())
+  expiresAt     DateTime?
+
+  issuedBy      String
+  notes         String?
+
+  active        Boolean   @default(true)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([robloxUserId])
+  @@index([username])
+  @@index([active])
+  @@index([issuedAt])
+}
+
+model Appeal {
+  id           String   @id @default(cuid())
+  robloxUserId String
+  username     String
+  caseId       String
+  email        String
+  reason       String
+  statement    String
+  status       String   @default("Pending")
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  response     String?
+  createdAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([caseId])
+  @@index([robloxUserId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String
+  targetType String
+  targetId   String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model RuleCategory {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+
+  rules Rule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
+model Rule {
+  id          String   @id @default(cuid())
+  ruleNumber  String   @unique
+  categoryId  String
+
+  title       String
+  description String
+
+  severity    String   @default("Standard")
+  sortOrder   Int      @default(0)
+
+  published Boolean @default(true)
+  archived  Boolean @default(false)
+
+  category RuleCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([published])
+  @@index([archived])
+  @@index([sortOrder])
+}
