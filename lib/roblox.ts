@@ -37,18 +37,28 @@ export async function updateRobloxBan({
     };
   }
 
+  const restriction = {
+    active: true,
+    privateReason:
+      reason || "UKRP moderation action.",
+    displayReason:
+      reason ||
+      "You have been banned from this experience.",
+    excludeAltAccounts: false,
+  };
+
   const payload = active
     ? {
-        gameJoinRestriction: {
-          active: true,
-          duration: `${durationSeconds ?? -1}s`,
-          privateReason:
-            reason || "UKRP moderation action.",
-          displayReason:
-            reason ||
-            "You have been banned from this experience.",
-          excludeAltAccounts: false,
-        },
+        gameJoinRestriction:
+          durationSeconds === -1
+            ? restriction
+            : {
+                ...restriction,
+                duration: `${Math.max(
+                  1,
+                  durationSeconds ?? 1
+                )}s`,
+              },
       }
     : {
         gameJoinRestriction: {
