@@ -1,5 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 
+export const STAFF_ORGANIZATION_ID =
+  "org_3JAF0g2rrpvseJGSTQM7CrUyte1";
+
 export const STAFF_ROLES = [
   "org:staff",
   "org:management",
@@ -8,13 +11,23 @@ export const STAFF_ROLES = [
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 export async function getStaffAuth() {
-  const { userId, has } = await auth();
+  const { userId, orgId, has } = await auth();
 
   if (!userId) {
     return {
       authenticated: false,
       authorized: false,
       userId: null,
+      role: null,
+    };
+  }
+
+  // Staff access is only valid inside the UKRP Staff Organization.
+  if (orgId !== STAFF_ORGANIZATION_ID) {
+    return {
+      authenticated: true,
+      authorized: false,
+      userId,
       role: null,
     };
   }
