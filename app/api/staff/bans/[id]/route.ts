@@ -31,7 +31,7 @@ export async function PATCH(
       );
     }
 
-    if (!staff.userId) {
+if (!staff.userId) {
   return NextResponse.json(
     { error: "Unable to identify the authenticated staff member." },
     { status: 401 }
