@@ -31,6 +31,13 @@ export async function PATCH(
       );
     }
 
+    if (!staff.userId) {
+  return NextResponse.json(
+    { error: "Unable to identify the authenticated staff member." },
+    { status: 401 }
+  );
+}
+
     const { id } = await params;
     const body = await request.json();
 
