@@ -24,19 +24,25 @@ export async function POST(request: Request) {
 
     if (!staff.authorized) {
       return NextResponse.json(
-        { error: "You do not have permission to perform this action." },
+        {
+          error:
+            "You do not have permission to perform this action.",
+        },
         { status: 403 }
       );
     }
 
-if (!staff.userId) {
-  return NextResponse.json(
-    { error: "Unable to identify the authenticated staff member." },
-    { status: 401 }
-  );
-}
+    if (!staff.userId) {
+      return NextResponse.json(
+        {
+          error:
+            "Unable to identify the authenticated staff member.",
+        },
+        { status: 401 }
+      );
+    }
 
-const staffUserId = staff.userId;
+    const staffUserId = staff.userId;
 
     const body = await request.json();
 
@@ -151,19 +157,82 @@ const staffUserId = staff.userId;
       },
     });
 
+    /*
+     * Warnings are database-only moderation records.
+     * Actual Roblox restrictions are only applied to bans.
+     */
     if (!isWarning) {
       try {
         const robloxResult = await updateRobloxBan({
-        userId: ban.robloxUserId,
-        active: true,
-        durationSeconds: durationToSeconds(
-          ban.duration,
-          ban.expiresAt
-        ),
-        reason: ban.reason,
+          userId: ban.robloxUserId,
+          active: true,
+          durationSeconds: durationToSeconds(
+            ban.duration,
+            ban.expiresAt
+          ),
+          reason: ban.reason,
         });
 
         if (!robloxResult.success) {
+          await prisma.ban.update({
+            where: {
+              id: ban.id,
+            },
+            data: {
+              active: false,
+            },
+          });
+
+          await prisma.auditLog.create({
+            data: {
+              actorId: staffUserId,
+              action: "BAN_ROBLOX_SYNC_FAILED",
+              targetType: "Ban",
+              targetId: ban.id,
+              metadata: JSON.stringify({
+                caseId: ban.caseId,
+                robloxUserId: ban.robloxUserId,
+                configured: robloxResult.configured,
+                status: robloxResult.status ?? null,
+                error: robloxResult.error ?? null,
+              }),
+            },
+          });
+
+          /*
+           * IMPORTANT:
+           * Return Roblox's actual error to the frontend.
+           * This makes authentication, permission, payload,
+           * user ID and API configuration errors visible.
+           */
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                robloxResult.error ||
+                "Roblox rejected the restriction.",
+              caseId: ban.caseId,
+              banId: ban.id,
+              roblox: {
+                synced: false,
+                configured: robloxResult.configured,
+                status: robloxResult.status ?? null,
+              },
+            },
+            { status: 502 }
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Roblox ban synchronization failed:",
+          error
+        );
+
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Unknown Roblox API error.";
+
         await prisma.ban.update({
           where: {
             id: ban.id,
@@ -182,49 +251,20 @@ const staffUserId = staff.userId;
             metadata: JSON.stringify({
               caseId: ban.caseId,
               robloxUserId: ban.robloxUserId,
-              configured: robloxResult.configured,
+              error: errorMessage,
             }),
           },
         });
 
         return NextResponse.json(
           {
-            error: robloxResult.configured
-              ? "Ban was created, but Roblox could not be updated. The ban has been marked inactive."
-              : "Roblox integration is not configured. The ban has been marked inactive.",
-          },
-          { status: 502 }
-        );
-      }
-    } catch (error) {
-      console.error("Roblox ban synchronization failed:", error);
-
-      await prisma.ban.update({
-        where: {
-          id: ban.id,
-        },
-        data: {
-          active: false,
-        },
-      });
-
-      await prisma.auditLog.create({
-        data: {
-          actorId: staffUserId,
-          action: "BAN_ROBLOX_SYNC_FAILED",
-          targetType: "Ban",
-          targetId: ban.id,
-          metadata: JSON.stringify({
+            success: false,
+            error: `Roblox ban synchronization failed: ${errorMessage}`,
             caseId: ban.caseId,
-            robloxUserId: ban.robloxUserId,
-          }),
-        },
-      });
-
-        return NextResponse.json(
-          {
-            error:
-              "The moderation record was created, but Roblox rejected the restriction. The ban has been marked inactive.",
+            banId: ban.id,
+            roblox: {
+              synced: false,
+            },
           },
           { status: 502 }
         );
