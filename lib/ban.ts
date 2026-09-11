@@ -3,9 +3,8 @@ export function durationToSeconds(
   expiresAt?: Date | null
 ) {
   if (duration === "Permanent") {
-    // Roblox Open Cloud durations support values up to 315,576,000,000 seconds.
-    // Use the documented maximum as the practical permanent restriction.
-    return 315576000000;
+    // Roblox uses -1 to represent a permanent restriction.
+    return -1;
   }
 
   if (expiresAt) {
