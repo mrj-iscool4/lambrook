@@ -1,12 +1,11 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
-// Authentication/authorization is enforced at the resources themselves.
-// This proxy makes Clerk session state available to those server-side checks.
 export default clerkMiddleware();
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ico|ttf|woff2?|webmanifest)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
+    "/__clerk/(.*)",
   ],
 };
