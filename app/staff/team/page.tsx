@@ -9,24 +9,14 @@ import { getStaffAuth } from "@/lib/auth";
 
 const roles = [
   {
-    key: "org:moderator",
-    name: "Moderator",
-    description: "Handles day-to-day moderation and player reports.",
-  },
-  {
-    key: "org:senior_moderator",
-    name: "Senior Moderator",
-    description: "Supervises moderation activity and complex cases.",
-  },
-  {
-    key: "org:adminsitrator",
-    name: "Administrator",
-    description: "Responsible for wider administrative operations.",
+    key: "org:staff",
+    name: "Staff",
+    description: "Handles day-to-day moderation, player reports, bans and appeals.",
   },
   {
     key: "org:management",
     name: "Management",
-    description: "Highest staff level with overall platform oversight.",
+    description: "Oversees staff operations and has full management access.",
   },
 ];
 
@@ -89,8 +79,7 @@ export default async function StaffTeamPage() {
               </p>
 
               <p className="mt-1 text-[10px] leading-5 text-[#969aa1]">
-                Staff access is controlled through Clerk
-                Organizations.
+                Staff access is controlled through Clerk Organizations.
               </p>
             </div>
           </div>
@@ -138,14 +127,8 @@ function formatRole(role: string | null) {
     case "org:management":
       return "Management";
 
-    case "org:adminsitrator":
-      return "Administrator";
-
-    case "org:senior_moderator":
-      return "Senior Moderator";
-
-    case "org:moderator":
-      return "Moderator";
+    case "org:staff":
+      return "Staff";
 
     default:
       return "Staff";
