@@ -3,7 +3,7 @@ export function durationToSeconds(
   expiresAt?: Date | null
 ) {
   if (duration === "Permanent") {
-    // Roblox uses -1 to represent a permanent restriction.
+    // Internal marker for a permanent Roblox restriction.
     return -1;
   }
 
